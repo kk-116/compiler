@@ -1,5 +1,4 @@
-#ifndef SCANNER_H
-#define SCANNER_H
+
 /*If FlexLexer.h has not been included before */
 
 #if !defined(yyFlexLexerOnce)
@@ -41,4 +40,4 @@ namespace IPL
 
 //#endif /* END __IPLSCANNER_HPP__ */
 
-#endif
+

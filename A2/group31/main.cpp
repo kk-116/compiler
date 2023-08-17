@@ -6,7 +6,7 @@ using namespace std;
 
 SymbTab gst, gstfun, gststruct; 
 string filename;
-extern std::map<string,abstract_astnode*> ast;
+extern std::map<std::string, abstract_astnode*> ast;
 // std::map<std::string, datatype> predefined {
 //             {"printf", createtype(VOID_TYPE)},
 //             {"scanf", createtype(VOID_TYPE)},
@@ -70,9 +70,9 @@ for (auto it = gstfun.Entries.begin(); it != gstfun.Entries.end(); ++it)
 	cout << "\"localST\": " << endl;
 	it->second->symbtab->print();
 	cout << "," << endl;
-	cout << "\"ast\": {" << endl;
+	cout << "\"ast\": { " << endl;
 	ast[it->first]->print(0);
-	cout << "}"<<endl;
+	cout << "} " << endl;
 	cout << "}" << endl;
 	if (next(it,1) != gstfun.Entries.end()) cout << "," << endl;
 	

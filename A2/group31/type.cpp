@@ -1,247 +1,209 @@
 #include "type.hh"
+#include <iostream>
 
-// #include <stdexcept>
- #include <sstream>
-
-// Type::Type(string name){
-//     this->name = name;
-// }
-
-// string Type::getType(){
-//     return this->name;
-// }
-
-// bool Type::isCompat(Type* other) {
-//     if(this==ther){
-//         return true;
-//     }
-//     for(Type* type : compat){
-//         if(type->isCompat(other)){
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
-// void Type::addCompat(Type* type) {
-//     compat.push_back(type);
-// }
-
-
-// Type::Type(datatype t)
-//     : m_datatype(t),m_size(0),m_struct_name("")
-// {
-//     if(t==CHAR_TYPE){
-//         m_size =1;
-//     }
-// }
-
-// Type::Type(datatype t,int size)
-//     : m_datatype(t),m_size(size),m_struct_name("")
-// {
-//     if(t!=CHAR_TYPE){
-//         throw invalid_argument("Size argument valid only for char type");
-//     }
-// }
-
-// Type::Type(datatype t,string s)
-//     : m_datatype(t),m_size(0),m_struct_name(s)
-// {
-//     if(t!=STRUCT_TYPE){
-//         throw invalid_argument("struct name argument valid only for struct type");
-
-//     }
-// }
-
-// Type::Type(const Type& other)
-//     : m_datatype(other.m_datatype),m_size(other.m_size),m_struct_name(other.m_struct_name)
-// {
-// }
-
-// Type& Type::operator=(const Type& other)
-// {
-//     if(this != &other){
-//         m_datatype = other.m_datatype;
-//         m_struct_name = other.m_struct_name;
-//         m_size = other.m_size;
-//     }
-//     return *this;
-// }
-
-// bool Type::operator==(const Type& other) const
-// {
-    
-//     if(m_datatype != other.m_datatype){return false;}
-//     if(m_datatype == datatype::CHAR_TYPE){return true;}
-//     if(m_datatype == datatype::STRUCT_TYPE){
-//         return m_struct_name ==other.m_struct_name;
-//     }
-//     return true;
-// }
-
-// bool Type::operator!=(const Type& other) const
-// {
-    
-//     return !(*this == other);
-// }
-
-// bool Type::is_void() const{
-//     return m_datatype == datatype::VOID_TYPE;
-// }
-
-// bool Type::is_int() const{
-//     return m_datatype == datatype::INT_TYPE;
-// }
-
-// bool Type::is_float() const{
-//     return m_datatype == datatype::FLOAT_TYPE;
-// }
-
-// bool Type::is_bool() const{
-//     return m_datatype == datatype::BOOL_TYPE;
-// }
-
-// bool Type::is_char() const{
-//     return m_datatype == datatype::CHAR_TYPE;
-// }
-
-// bool Type::is_array() const{
-//     return m_size>0;
-// }
-
-// bool Type::is_struct() const{
-//     return !m_struct_name.empty();
-// }
-
-// int Type::get_size() const{
-//     return m_size;
-// }
-
-// datatype Type::get_datatype() const{
-//     return m_datatype;
-// }
-
-// string Type::get_struct_name() const{
-//     return m_struct_name;
-// }
-
-// string Type::to_string() const{
-//     switch(m_datatype){
-//         case VOID_TYPE:
-//             return "void";
-//         case INT_TYPE:
-//             return "int";
-//         case FLOAT_TYPE:
-//             return "float";
-//         case BOOL_TYPE:
-//             return "bool";
-//         case CHAR_TYPE:
-//             return "char";
-//         default:
-//             return m_struct_name
-//     }
-// }
-
-typeSymbol::typeSymbol(string name,string varfun,string scope,string type,int size,int offset,typeSymbTab* symbtab){
-    this->name = name;
-    this->varfun = varfun;
+dataType::dataType(std::string type, int ptr_count, std::vector<int> dimensions) {
     this->type = type;
-    this->scope = scope;
-    this->size = size;
-    this->offset = offset;
-    this->symbtab = symbtab;
+    this->ptr_count = ptr_count;
+    this->dimensions = dimensions;
 }
 
-fun_declarator_class::fun_declarator_class(string fun_id){
-    this->fun_id = fun_id;
+dataType::dataType(std::string type) {
+    this->type = type;
+    this->ptr_count = 0;
 }
 
-fun_declarator_class::fun_declarator_class(string fun_id,parameter_list_class* fun_list){
-    this->fun_id = fun_id;
-    this->fun_list = fun_list;
-}
-
-parameter_declaration_class::parameter_declaration_class(string par_type,declarator_class* par_dector){
-    this->par_type = par_type;
-    this->par_dector = par_dector;
-}
-
-declarator_class::declarator_class(string dector_str){
-    this->dector_str =  dector_str;
-}
-
-declaration_class::declaration_class(string dec_type,declarator_list_class* dec_list){
-    this->dec_type = dec_type;
-    this->dec_list = dec_list;
-}
-
-string declarator_class::getType(string type_s){
-    string type = "" +type_s;
-    for(long unsigned int i=0;i<this->star;i++){
-        type += "*";
+std::string createType(std::string type, int ptr_count, std::vector<int> dimensions) {
+    std::string result = type;
+    for (int i = 0; i < ptr_count; i++) {
+        result += "*";
     }
-    for(long unsigned int i=0;i<this->dector_array.size();i++){
-        type += "[" + to_string(dector_array[i]) + "]";
+    for (int i = 0; i < dimensions.size(); i++) {
+        result += "[";
+        result += std::to_string(dimensions[i]);
+        result += "]";
     }
-    return type;
+    return result;
 }
 
-int declarator_class::getSize(string type_s,typeSymbTab table){
-    
-    int size1 = 4;
-    string s = getType(type_s);
-    string star = "*";
-    bool point = 0;
-    bool normal = 0;
-    size_t f = s.find(star);
-    if(f != string::npos){
-        point = 1;
-    }
-
-    if(point ==0 && (type_s == "int" || type_s == "float" || type_s == "struct")){
-        normal =1;
-    }
-    if (point == 0 && normal == 0 ){
-
-        string s1;
-        size_t pos = s.find('[');
-        if(pos != string::npos){
-            s1 = s.substr(0,pos);
-        }else{
-            s1 =s;
+std::string getStructName(std::string type) {
+    int start = 0;
+    std::string ans;
+    for (int i = 0; i < type.length(); i++) {
+        if (start) {
+            ans += type[i];
         }
-        int count = 0;
-        stringstream ss(s1);
-        string word;
-        string check = "";
-        while(ss >> word){
-         if(count == 0){
-             check += word + " ";
-         }
-         else if(count == 1){
-             check += word;
-         }
-         count++;
+        if (type[i] == ' ') {
+            start = 1;
         }
-
-    for(auto &itr: table.Entries){
-         if(check ==itr.first){
-            size1 = itr.second->size;
-         }
     }
-   
-    }
-       
-    for(long unsigned int i=0;i<this->dector_array.size();i++){
-        size1 = size1 * dector_array[i];
-    }
-    return size1;
+    return ans;
 }
 
-declaration_class::declaration_class(){}
-declarator_class::declarator_class(){}
-declarator_list_class::declarator_list_class(){}
-declaration_list_class::declaration_list_class(){}
-parameter_declaration_class::parameter_declaration_class(){}
-parameter_list_class::parameter_list_class(){}
-fun_declarator_class::fun_declarator_class(){}
+int dataType::isInt() {
+    if (this->type == "int" && this->ptr_count == 0 && this->dimensions.size() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isFloat() {
+    if (this->type == "float" && this->ptr_count == 0 && this->dimensions.size() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isString() {
+    if (this->type == "string" && this->ptr_count == 0 && this->dimensions.size() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isPointer() {
+    if (this->ptr_count + this->dimensions.size() > 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isPurePointer() {
+    if (this->ptr_count > 0 && this->dimensions.size() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isArray() {
+    if (this->dimensions.size() > 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isStruct() {
+    if (this->type != "int" && this->type != "float" && this->type != "void" && this->type != "string") {
+        if (this->ptr_count == 0 && this->dimensions.size() == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int dataType::isStructPtr() {
+    if (this->type != "int" && this->type != "float" && this->type != "void" && this->type != "string") {
+        if (this->ptr_count + this->dimensions.size() == 1) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int dataType::isVoidPtr() {
+    if (this->type == "void" && this->ptr_count == 1 && this->dimensions.size() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int dataType::isArithmeticType() {
+    if (this->isStruct() == 0) {
+        return 1;
+    }
+    return 0;
+}
+
+int areCompatible(dataType* t1, dataType* t2) {
+    // if ((t1->isInt() && t2->isFloat()) || (t1->isFloat() && t2->isInt())) {
+    //     return 1;
+    // }
+    int t1dim = t1->dimensions.size();
+    int t2dim = t2->dimensions.size();
+    if (t1->ptr_count + t1dim > 0 && t2->ptr_count + t2dim > 0) {
+        if (t1->isVoidPtr() || t2->isVoidPtr()) {
+            return 1;
+        }
+    }
+    if (t1->type == t2->type) {
+        if (t1->ptr_count - t2->ptr_count == 1 && t1dim == 0 && t2dim == 1) {
+            return 1;
+        }
+    }
+    if (t1->type == t2->type) {
+        if (t1->ptr_count - t2->ptr_count == -1 && t1dim == 1 && t2dim == 0) {
+            return 1;
+        }
+    }
+    if (t1->type == t2->type && t1->ptr_count == t2->ptr_count && t1dim == t2dim) {
+        for (int i = 1; i < t1dim; i++) {
+            if (t1->dimensions[i] != t2->dimensions[i]) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int areStrictlyCompatible(dataType* t1, dataType* t2) {
+    // if ((t1->isInt() && t2->isFloat()) || (t1->isFloat() && t2->isInt())) {
+    //     return 1;
+    // }
+    int t1dim = t1->dimensions.size();
+    int t2dim = t2->dimensions.size();
+    if (t1->type == t2->type) {
+        if (t1->ptr_count - t2->ptr_count == 1 && t1dim == 0 && t2dim == 1) {
+            return 1;
+        }
+    }
+    if (t1->type == t2->type) {
+        if (t1->ptr_count - t2->ptr_count == -1 && t1dim == 1 && t2dim == 0) {
+            return 1;
+        }
+    }
+    if (t1->type == t2->type && t1->ptr_count == t2->ptr_count && t1dim == t2dim) {
+        for (int i = 1; i < t1dim; i++) {
+            if (t1->dimensions[i] != t2->dimensions[i]) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
+std::string dataType::toString() {
+    std::string res = this->type;
+    for (int i = 0; i < this->ptr_count; i++) {
+        res += "*";
+    }
+    if (this->dimensions.size() > 0) {
+        res += "(*)";
+    }
+    for (int i = 1; i < this->dimensions.size(); i++) {
+        res += "[";
+        res += std::to_string(this->dimensions[i]);
+        res += "]";
+    }
+    return res;
+}
+
+std::string getOpType(dataType* t1, dataType* t2, std::string basetype) {
+    std::string op = basetype + "_";
+    if (t1->isInt() && t2->isInt()) {
+        op += "INT";
+    }
+    else if (t1->isFloat() && t2->isInt()) {
+        op += "FLOAT";
+    }
+    else if (t1->isInt() && t2->isFloat()) {
+        op += "FLOAT";
+    }
+    else if (t1->isFloat() && t2->isFloat()) {
+        op += "FLOAT";
+    }
+    else {
+        op = "incompatible";
+    }
+    return op;
+}

@@ -11,7 +11,7 @@
 //If you want the type of the generated scanner to be different, do this
 
 #undef  YY_DECL
-#define YY_DECL int IPL::Scanner::yylex( IPL::Parser::semantic_type * const lval, IPL::Parser::location_type *location )
+#define YY_DECL int IPL::Scanner::yylex( IPL::Parser::semantic_type * const lval, IPL::Parser::location_type *loc )
 
 //We want these to be the first action after a token is recognized. 
 
@@ -35,118 +35,53 @@
 %{ /** Code executed at the beginning of yylex **/
 
       yylval = lval;
-      loc = location;
-
 %}
 
-[ \t]                             //skip
-"/*"([^*]|(\*+[^*/]))*\*+\/       //skip
-[1-9][0-9]*|0[bB][01]*|0[0-7]*|0[xX][0-9a-fA-F]*   { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::INT_CONSTANT;
-}
+[ \t]                                      //skip
+"void"                                    { yylval->emplace<std::string>(YYText()); return token_type::VOID;}
+"int"                                     { yylval->emplace<std::string>(YYText()); return token_type::INT;}    
+"float"                                   { yylval->emplace<std::string>(YYText()); return token_type::FLOAT;}
+"if"                                      { yylval->emplace<std::string>(YYText()); return token_type::IF;}
+"struct"                                  { yylval->emplace<std::string>(YYText()); return token_type::STRUCT;}
+"else"                                    { yylval->emplace<std::string>(YYText()); return token_type::ELSE;}
+"while"                                   { yylval->emplace<std::string>(YYText()); return token_type::WHILE;}
+"for"                                     { yylval->emplace<std::string>(YYText()); return token_type::FOR;}
+"return"                                  { yylval->emplace<std::string>(YYText()); return token_type::RETURN;}
 "."                                         return '.';
-[0-9]*"."[0-9]*([eE][+-][0-9]*|[eE][0-9]*)?   { 
-       yylval->emplace< std::string >(YYText() );
-       return token_type::FLOAT_CONSTANT;
-}
-"struct"                                    { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::STRUCT;
-}
-"if"                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::IF;
-}
-"else"                                      {
-       yylval->emplace< std::string >(YYText() );
-       return token_type::ELSE;
-}
-"while"                                     { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::WHILE;
-}
-"for"                                       { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::FOR;
-}
-"void"                                      { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::VOID;
-}
-"int"                                       { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::INT;
-}
-
-"float"                                     { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::FLOAT;
-}
-"return"                                    { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::RETURN;
-}
-[a-zA-Z_]?\"(\\.|[^\\"])*\"                 { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::STRING_LITERAL;
-}
-[a-zA-Z_][a-zA-Z0-9_]*                     { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::IDENTIFIER;
-}
-"||"                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::OR_OP;
-}
-"&&"                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::AND_OP;
-}
-"=="                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::EQ_OP;
-}
-"!="                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::NE_OP;
-}
-"<="                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::LE_OP;
-}
-">="                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::GE_OP;
-}
-"++"                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::INC_OP;
-}
-"->"                                        { 
-       yylval->emplace< std::string >(YYText() ); 
-       return token_type::PTR_OP;
-}               
-"+"                                         return '+';
+"/*"([^*]|(\*+[^*/]))*\*+\/
+[_[:alpha:]][_[:alnum:]]*                                          { yylval->emplace<std::string>(YYText()); return token_type::IDENTIFIER;}
+[1-9][0-9]*|0[bB][01]+|0[0-7]*|0[xX][0-9a-fA-F]+                   { yylval->emplace<std::string>(YYText()); return token_type::INT_CONSTANT;}
+(0|[1-9][0-9]*)?["."][0-9]*([eE][+-][0-9]+|[eE][0-9]+)?            { yylval->emplace<std::string>(YYText()); return token_type::FLOAT_CONSTANT;}
+\"(\\[^\n]|[^\n\*\\])*\"                                           { yylval->emplace<std::string>(YYText()); return token_type::STRING_LITERAL;}
+"&&"                                        { yylval->emplace<std::string>(YYText()); return token_type::AND_OP;}
+"||"                                        { yylval->emplace<std::string>(YYText()); return token_type::OR_OP;}
+"=="                                        { yylval->emplace<std::string>(YYText()); return token_type::EQ_OP;}
+"!="                                        { yylval->emplace<std::string>(YYText()); return token_type::NE_OP;}
+"<="                                        { yylval->emplace<std::string>(YYText()); return token_type::LE_OP;}
+">="                                        { yylval->emplace<std::string>(YYText()); return token_type::GE_OP;}
+"++"                                        { yylval->emplace<std::string>(YYText()); return token_type::INC_OP;}
+"->"                                        { yylval->emplace<std::string>(YYText()); return token_type::PTR_OP;}
 "-"                                         return '-';
-"*"                                         return '*';
-"/"                                         return '/';
-">"                                         return '>';
+"!"                                         return '!';
+"&"                                         return '&';
 "<"                                         return '<';
-"="                                         return '=';
-"["                                         return '[';
-"]"                                         return ']';
-"{"                                         return '{';
-"}"                                         return '}';
+">"                                         return '>';
+"+"                                         return '+';
+","                                         return ',';
 "("                                         return '(';
 ")"                                         return ')';
-"&"                                         return '&';
-"!"                                         return '!';
-","                                         return ',';
-";"                                         return ';';        
-[\n]                                        loc->lines();                                
-<<EOF>>         yyterminate();
-.				        ;
+":"                                         return ':';
+"{"                                         return '{';
+"}"                                         return '}';
+"*"                                         return '*';
+";"                                         return ';';
+"["                                         return '[';
+"]"                                         return ']';
+"="                                         return '=';
+"/"                                         return '/';
+[\n]                                        loc->lines();
+<<EOF>>                                     yyterminate();
+.				                    return token_type::OTHERS;
 
 
 %%
